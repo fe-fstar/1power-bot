@@ -74,7 +74,11 @@ client.on("messageCreate", async (message) => {
     
     if(message.content == prefix + "resume") {
         if(subscription) {
-			subscription.audioPlayer.unpause();
+			if(message.member?.voice.channel == message.guild.me.voice.channel) {
+				subscription.audioPlayer.unpause();
+			} else {
+				await message.reply("The bot is currently in another channel right now.");
+			}
 		} else {
 			message.reply("Not playing in this server.");
 		}
@@ -82,7 +86,12 @@ client.on("messageCreate", async (message) => {
 
     if(message.content == prefix + "pause") {
         if(subscription) {
-			subscription.audioPlayer.pause();
+			console.log(client);
+			if(message.member?.voice.channel === message.guild.me.voice.channel) {
+				subscription.audioPlayer.pause();
+			} else {
+				await message.reply("The bot is currently in another channel right now.");
+			}
 		} else {
 			message.reply("Not playing in this server.");
 		}
@@ -90,8 +99,10 @@ client.on("messageCreate", async (message) => {
 
     if(message.content == prefix + "leave") {
         if(subscription) {
-			subscription.connection.destroy();
-			subscriptions.delete(message.guildId);
+			if(message.member?.voice.channel === message.guild.me.voice.channel) {
+				subscription.connection.destroy();
+				subscriptions.delete(message.guildId);
+			}
 		} else {
 			message.reply("Not playing in this server.");
 		}
