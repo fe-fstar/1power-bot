@@ -86,7 +86,6 @@ client.on("messageCreate", async (message) => {
 
     if(message.content == prefix + "pause") {
         if(subscription) {
-			console.log(client);
 			if(message.member?.voice.channel === message.guild.me.voice.channel) {
 				subscription.audioPlayer.pause();
 			} else {
