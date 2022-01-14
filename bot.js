@@ -2,6 +2,8 @@ const Discord = require("discord.js");
 
 require("dotenv").config();
 
+var MusicSubscription = require("./subscription");
+
 const {
 	NoSubscriberBehavior,
 	StreamType,
@@ -22,11 +24,7 @@ const client = new Discord.Client({
     ]
 });
 
-const player = createAudioPlayer();
-
-const resource = createAudioResource("https://live.powerhitz.com/1power?esPlayer.mp3");
-
-let connection;
+const subscriptions = new Map();
 
 const prefix = "1p.";
 
@@ -36,13 +34,6 @@ async function connectToChannel(channel) {
 		guildId: channel.guild.id,
 		adapterCreator: channel.guild.voiceAdapterCreator,
 	});
-	try {
-		await entersState(connection, VoiceConnectionStatus.Ready, 30_000);
-		return connection;
-	} catch (error) {
-		connection.destroy();
-		throw error;
-	}
 }
 
 client.on("ready", () => {
@@ -52,37 +43,58 @@ client.on("ready", () => {
 
 
 client.on("messageCreate", async (message) => {
+	let subscription = subscriptions.get(message.guildId);
     if(message.content == prefix + "source") {
         message.reply("https://powerhitz.com/1Power");
     }
 
     if(message.content == prefix + "play") {
-        const channel = message.member?.voice.channel;
-		if (channel) {
-			try {
-				connection = await connectToChannel(channel);
-                player.play(resource);
-                connection.subscribe(player);
-				await message.reply("Playing now!");
-			} catch (error) {
-				console.error(error);
+		if(!subscription) {
+			const channel = message.member?.voice.channel;
+			if (channel) {
+				subscription = new MusicSubscription(
+					joinVoiceChannel({
+						channelId: channel.id,
+						guildId: channel.guild.id,
+						adapterCreator: channel.guild.voiceAdapterCreator
+					})
+				);
+				subscription.connection.on("error", console.warn);
+				subscriptions.set(message.guildId, subscription);
+				try {
+					await message.reply("Playing now!");
+				} catch (error) {
+					console.error(error);
+				}
+			} else {
+				await message.reply("Join a voice channel then try again!");
 			}
-		} else {
-			await message.reply("Join a voice channel then try again!");
 		}
     }
     
     if(message.content == prefix + "resume") {
-        player.unpause();
+        if(subscription) {
+			subscription.audioPlayer.unpause();
+		} else {
+			message.reply("Not playing in this server.");
+		}
     }
 
     if(message.content == prefix + "pause") {
-        player.pause();
+        if(subscription) {
+			subscription.audioPlayer.pause();
+		} else {
+			message.reply("Not playing in this server.");
+		}
     }
 
     if(message.content == prefix + "leave") {
-        player.pause();
-        connection.destroy();
+        if(subscription) {
+			subscription.connection.destroy();
+			subscriptions.delete(message.guildId);
+		} else {
+			message.reply("Not playing in this server.");
+		}
     }
 });
 
