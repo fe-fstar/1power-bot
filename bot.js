@@ -26,6 +26,8 @@ const player = createAudioPlayer();
 
 const resource = createAudioResource("https://live.powerhitz.com/1power?esPlayer.mp3");
 
+let connection;
+
 const prefix = "1p.";
 
 async function connectToChannel(channel) {
@@ -45,6 +47,7 @@ async function connectToChannel(channel) {
 
 client.on("ready", () => {
     console.log(`Logged in as ${client.user.tag}`);
+    client.user.setActivity("Kolta", {type: 2});
 });
 
 
@@ -57,7 +60,7 @@ client.on("messageCreate", async (message) => {
         const channel = message.member?.voice.channel;
 		if (channel) {
 			try {
-				const connection = await connectToChannel(channel);
+				connection = await connectToChannel(channel);
                 player.play(resource);
                 connection.subscribe(player);
 				await message.reply("Playing now!");
@@ -67,6 +70,19 @@ client.on("messageCreate", async (message) => {
 		} else {
 			await message.reply("Join a voice channel then try again!");
 		}
+    }
+    
+    if(message.content == prefix + "resume") {
+        player.unpause();
+    }
+
+    if(message.content == prefix + "pause") {
+        player.pause();
+    }
+
+    if(message.content == prefix + "leave") {
+        player.pause();
+        connection.destroy();
     }
 });
 
