@@ -1,0 +1,14 @@
+{
+  "name": "power_hitz_1power",
+  "version": "1.0.0",
+  "description": "24/7 Radio Player For powerhitz.com 1power",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Kolta",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^13.6.0"
+  }
+}
