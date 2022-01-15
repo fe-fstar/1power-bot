@@ -11,10 +11,10 @@ const {
 } = require('@discordjs/voice');
 
 class MusicSubscription {
-	constructor(connection) {
-		this.resource = createAudioResource("https://live.powerhitz.com/1power?esPlayer.mp3");;
+	constructor(connection, resource) {
+		this.resource = createAudioResource(resource);
 		try {
-			entersState(connection, VoiceConnectionStatus.Ready, 5_000);
+			entersState(connection, VoiceConnectionStatus.Ready, 30_000);
 		} catch (error) {
 			connection.destroy();
 			throw error;
@@ -26,8 +26,16 @@ class MusicSubscription {
 		connection.subscribe(this.audioPlayer);
 	}
 
+	play() {
+		this.audioPlayer.play(this.resource);
+	}
+
 	stop() {
 		this.audioPlayer.stop(true);
+	}
+
+	refreshResource() {
+		this.resource = createAudioResource(resource);
 	}
 }
 
