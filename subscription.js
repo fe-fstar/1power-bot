@@ -35,7 +35,7 @@ class MusicSubscription {
 	}
 
 	refreshResource() {
-		this.resource = createAudioResource(resource);
+		this.resource = createAudioResource(this.resource);
 	}
 }
 
