@@ -1,5 +1,6 @@
 const Discord = require("discord.js");
 const axios = require('axios');
+const { MessageEmbed } = require('discord.js');
 require("dotenv").config();
 
 var MusicSubscription = require("./subscription");
@@ -26,31 +27,20 @@ const client = new Discord.Client({
 
 const subscriptions = new Map();
 
-const prefix = "+";
-
-async function connectToChannel(channel) {
-	const connection = joinVoiceChannel({
-		channelId: channel.id,
-		guildId: channel.guild.id,
-		adapterCreator: channel.guild.voiceAdapterCreator,
-	});
-}
+const prefix = "1";
 
 client.on("ready", () => {
 	console.log(`Logged in as ${client.user.tag}`);
-	client.user.setActivity(`${prefix}play`, { type: 2 });
+	client.user.setActivity(`${prefix}play`, { type: "LISTENING" });
 });
-
 
 client.on("messageCreate", async (message) => {
 	let subscription = subscriptions.get(message.guildId);
-	console.log(message.content);
+
 	if (message.content === prefix + "source") { // Source link command
-		console.log("source worked");
 		message.reply("https://powerhitz.com/1Power");
 	}
 	else if (message.content === prefix + "join" || message.content === prefix + "play") { // Join voice channel command
-		console.log("join worked");
 		if (!subscription) {
 			const channel = message.member?.voice.channel;
 			if (channel) {
@@ -63,6 +53,19 @@ client.on("messageCreate", async (message) => {
 				);
 				subscription.connection.on("error", console.warn);
 				subscriptions.set(message.guildId, subscription);
+				subscription.connection.on(VoiceConnectionStatus.Disconnected, async (oldState, newState) => {
+					try {
+						await Promise.race([
+							entersState(subscription.connection, VoiceConnectionStatus.Signalling, 3_000),
+							entersState(subscription.connection, VoiceConnectionStatus.Connecting, 3_000),
+						]);
+						// Seems to be reconnecting to a new channel - ignore disconnect
+					} catch (error) {
+						// Seems to be a real disconnect which SHOULDN'T be recovered from
+						subscription.connection.destroy();
+						subscriptions.delete(message.guildId);
+					}
+				});
 				try {
 					await message.reply("Playing now!");
 					message.react("🔴");
@@ -77,7 +80,6 @@ client.on("messageCreate", async (message) => {
 		}
 	}
 	else if (message.content === prefix + "leave" || message.content === prefix + "stop") { // Disconnect the player command
-		console.log("stop worked");
 		if (subscription) {
 			if (message.member?.voice.channel == message.guild.me.voice.channel) {
 				subscription.connection.destroy();
@@ -88,16 +90,21 @@ client.on("messageCreate", async (message) => {
 			}
 		}
 	}
-	else if (message.content === prefix + "current" || message.content ==="nowplaying") { // Current song command
+	else if (message.content === prefix + "current" || message.content === prefix + "nowplaying") { // Current song command
 		let getSong = async () => {
 			let response = await axios.get("https://player.powerhitz.com/streamdata.php?h=ais-edge16-jbmedia-nyc04.cdnstream.com&p=7080&i=1power");
 			let song = response.data;
 			return song;
 		}
 		let songValue = await getSong();
-		await message.reply(`Currently playing: ${songValue.song}`);
+		let exampleEmbed = new MessageEmbed()
+			.setColor("#ffd633")
+			.setAuthor( {name: "▶️ Currently Playing:"} )
+			.setTitle(!songValue.song.includes("POWERHITZ.COM - 1POWER") ? `${songValue.song}` : "Adversitements");
+
+		message.reply({ embeds: [exampleEmbed] });
 	}
-	else if (message.content === prefix + "lastplayed") { // Last played 5 songs player
+	else if (message.content === prefix + "lastplayed" || message.content === prefix + "last") { // Last played 5 songs command
 		let getSongList = async () => {
 			let response = await axios.get("https://player.powerhitz.com/external.php?http://ais-edge16-jbmedia-nyc04.cdnstream.com:8443/ice_history.php?h=ais-edge16-jbmedia-nyc04.cdnstream.com&p=7080&i=1power");
 			let songList = response.data;
@@ -105,22 +112,41 @@ client.on("messageCreate", async (message) => {
 		}
 		let songListValue = await getSongList();
 		let messageToReply = "";
-		var i = 0;
-		while (i < 5) {
-			if (!songListValue[i].song.includes("***** POWERHITZ.COM - 1POWER *****")) {
-				messageToReply += `${i + 1}. ${songListValue[i].song}\n`;
-				++i;
+		let i = 0;
+		let j = 0;
+		while (j < 5) {
+			if (!songListValue[i].title.includes('POWERHITZ.COM')) {
+				messageToReply += `${j + 1}. ${songListValue[i].song}\n`;
+				++j;
 			}
+			++i;
 		}
-		await message.reply(messageToReply);
+
+		let exampleEmbed = new MessageEmbed()
+			.setColor("#ffd633")
+			.setAuthor( {name: "▶️ Last Played 5 Tracks:"} )
+			.setDescription(`\`${messageToReply}\``);
+
+		message.reply({ embeds: [exampleEmbed] });
 	}
-	else if (message.content[0] === prefix) { // Invalid command
-		console.log("nothing worked");
-		if (message.member?.voice.channel == message.guild.me.voice.channel) {
-			message.reply("Invalid command.");
-		} else {
-			await message.reply("The bot is currently in another channel right now.");
-		}
+	else if (message.content === prefix + "help" || message.content === prefix + "commands") { // Help command
+		let exampleEmbed = new MessageEmbed()
+			.setColor("#ffd633")
+			.setTitle("About Power Hitz Bot:")
+			.setDescription("Power Hitz | 1Power Bot, made by Kolta, is a radio player to stream powerhitz.com/1Power")
+			.addFields(
+				{ name: `\`${prefix}source\``, value: 'Tells you the link to Power Hitz | Hits & Hip Hop' },
+				{ name: `\`${prefix}join\` (or \`${prefix}play\`)`, value: 'Starts playing the radio in the voice channel you are at.' },
+				{ name: `\`${prefix}leave\` (or \`${prefix}stop\`)`, value: 'Stops the radio and disconnects from the channel.' },
+				{ name: `\`${prefix}current\` (or \`${prefix}nowplaying\`)`, value: 'Tells you which music is currently playing (mismatches may occur).' },
+				{ name: `\`${prefix}lastplayed\` (or \`${prefix}last\`)`, value: 'Tells you the last 5 tracks played in the radio.' },
+				{ name: `\`${prefix}help\``, value: 'Tells you the available commands.' }
+			);
+
+		message.reply({ embeds: [exampleEmbed] });
+	}
+	else if (message.content[0] === prefix && !(message.member === message.guild.me)) { // Invalid command
+		message.reply(`Invalid command. You can type \`${prefix}help to see availabile commands.`);
 	}
 });
 

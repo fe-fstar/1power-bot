@@ -33,10 +33,6 @@ class MusicSubscription {
 	stop() {
 		this.audioPlayer.stop(true);
 	}
-
-	refreshResource() {
-		this.resource = createAudioResource(this.resource);
-	}
 }
 
 module.exports = MusicSubscription;
