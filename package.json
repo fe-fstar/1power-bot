@@ -1,6 +1,9 @@
 {
   "name": "power_hitz_1power",
   "version": "1.0.0",
+  "engines": {
+    "node": "16.x"
+  },
   "description": "24/7 Radio Player For powerhitz.com 1power",
   "main": "bot.js",
   "scripts": {
