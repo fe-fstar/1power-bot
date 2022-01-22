@@ -146,7 +146,7 @@ client.on("messageCreate", async (message) => {
 		message.reply({ embeds: [exampleEmbed] });
 	}
 	else if (message.content[0] === prefix && !(message.member === message.guild.me)) { // Invalid command
-		message.reply(`Invalid command. You can type \`${prefix}help to see availabile commands.`);
+		message.reply(`Invalid command. You can type \`${prefix}help\` to see available commands.`);
 	}
 });
 
