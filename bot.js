@@ -90,7 +90,7 @@ client.on("messageCreate", async (message) => {
 			}
 		}
 	}
-	else if (message.content === prefix + "current" || message.content === prefix + "nowplaying") { // Current song command
+	else if (message.content === prefix + "current" || message.content === prefix + "nowplaying"  || message.content === prefix + "now") { // Current song command
 		let getSong = async () => {
 			let response = await axios.get("https://player.powerhitz.com/streamdata.php?h=ais-edge16-jbmedia-nyc04.cdnstream.com&p=7080&i=1power");
 			let song = response.data;
@@ -100,7 +100,7 @@ client.on("messageCreate", async (message) => {
 		let exampleEmbed = new MessageEmbed()
 			.setColor("#ffd633")
 			.setAuthor( {name: "▶️ Currently Playing:"} )
-			.setTitle(!songValue.song.includes("POWERHITZ.COM - 1POWER") ? `${songValue.song}` : "Adversitements");
+			.setTitle(!songValue.song.includes("POWERHITZ.COM - 1POWER") ? `${songValue.song}` : "Advertisements");
 
 		message.reply({ embeds: [exampleEmbed] });
 	}
@@ -138,14 +138,14 @@ client.on("messageCreate", async (message) => {
 				{ name: `\`${prefix}source\``, value: 'Tells you the link to Power Hitz | Hits & Hip Hop' },
 				{ name: `\`${prefix}join\` (or \`${prefix}play\`)`, value: 'Starts playing the radio in the voice channel you are at.' },
 				{ name: `\`${prefix}leave\` (or \`${prefix}stop\`)`, value: 'Stops the radio and disconnects from the channel.' },
-				{ name: `\`${prefix}current\` (or \`${prefix}nowplaying\`)`, value: 'Tells you which music is currently playing (mismatches may occur).' },
+				{ name: `\`${prefix}current\` (or \`${prefix}nowplaying\` or \`${prefix}nowplaying\`)`, value: 'Tells you which music is currently playing (mismatches may occur).' },
 				{ name: `\`${prefix}lastplayed\` (or \`${prefix}last\`)`, value: 'Tells you the last 5 tracks played in the radio.' },
 				{ name: `\`${prefix}help\``, value: 'Tells you the available commands.' }
 			);
 
 		message.reply({ embeds: [exampleEmbed] });
 	}
-	else if (message.content[0] === prefix && !(message.member === message.guild.me)) { // Invalid command
+	else if ((message.content[0] === prefix || message.content != prefix + ".") && !(message.member === message.guild.me)) { // Invalid command
 		message.reply(`Invalid command. You can type \`${prefix}help\` to see available commands.`);
 	}
 });
