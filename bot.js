@@ -4,6 +4,7 @@ const { MessageEmbed } = require('discord.js');
 require("dotenv").config();
 
 var MusicSubscription = require("./subscription");
+const isInvalidCommand = require("./utils");
 
 const {
 	NoSubscriberBehavior,
@@ -145,7 +146,7 @@ client.on("messageCreate", async (message) => {
 
 		message.reply({ embeds: [exampleEmbed] });
 	}
-	else if ((message.content[0] === prefix || message.content.substring(0, 2) === prefix + ".") && !(message.member === message.guild.me)) { // Invalid command
+	else if (isInvalidCommand(message.content, prefix)) { // Invalid command
 		message.reply(`Invalid command. You can type \`${prefix}help\` to see available commands.`);
 	}
 });
