@@ -36,12 +36,13 @@ client.on("ready", () => {
 });
 
 client.on("messageCreate", async (message) => {
+	let messageIncoming = message.content.toLowerCase();
 	let subscription = subscriptions.get(message.guildId);
 
-	if (message.content === prefix + "source") { // Source link command
+	if (messageIncoming === prefix + "source") { // Source link command
 		message.reply("https://powerhitz.com/1Power");
 	}
-	else if (message.content === prefix + "join" || message.content === prefix + "play") { // Join voice channel command
+	else if (messageIncoming === prefix + "join" || messageIncoming === prefix + "play") { // Join voice channel command
 		if (!subscription) {
 			const channel = message.member?.voice.channel;
 			if (channel) {
@@ -80,7 +81,7 @@ client.on("messageCreate", async (message) => {
 			await message.reply("The bot is already in a channel.");
 		}
 	}
-	else if (message.content === prefix + "leave" || message.content === prefix + "stop") { // Disconnect the player command
+	else if (messageIncoming === prefix + "leave" || messageIncoming === prefix + "stop") { // Disconnect the player command
 		if (subscription) {
 			if (message.member?.voice.channel == message.guild.me.voice.channel) {
 				subscription.connection.destroy();
@@ -91,7 +92,7 @@ client.on("messageCreate", async (message) => {
 			}
 		}
 	}
-	else if (message.content === prefix + "current" || message.content === prefix + "nowplaying"  || message.content === prefix + "now") { // Current song command
+	else if (messageIncoming === prefix + "current" || messageIncoming === prefix + "nowplaying"  || messageIncoming === prefix + "now") { // Current song command
 		let getSong = async () => {
 			let response = await axios.get("https://player.powerhitz.com/streamdata.php?h=ais-edge16-jbmedia-nyc04.cdnstream.com&p=7080&i=1power");
 			let song = response.data;
@@ -105,7 +106,7 @@ client.on("messageCreate", async (message) => {
 
 		message.reply({ embeds: [exampleEmbed] });
 	}
-	else if (message.content === prefix + "lastplayed" || message.content === prefix + "last") { // Last played 5 songs command
+	else if (messageIncoming === prefix + "lastplayed" || messageIncoming === prefix + "last") { // Last played 5 songs command
 		let getSongList = async () => {
 			let response = await axios.get("https://player.powerhitz.com/external.php?http://ais-edge16-jbmedia-nyc04.cdnstream.com:8443/ice_history.php?h=ais-edge16-jbmedia-nyc04.cdnstream.com&p=7080&i=1power");
 			let songList = response.data;
@@ -130,7 +131,7 @@ client.on("messageCreate", async (message) => {
 
 		message.reply({ embeds: [exampleEmbed] });
 	}
-	else if (message.content === prefix + "help" || message.content === prefix + "commands") { // Help command
+	else if (messageIncoming === prefix + "help" || messageIncoming === prefix + "commands") { // Help command
 		let exampleEmbed = new MessageEmbed()
 			.setColor("#ffd633")
 			.setTitle("About Power Hitz Bot:")
