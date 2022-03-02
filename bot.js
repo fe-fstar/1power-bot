@@ -90,19 +90,19 @@ client.on("messageCreate", async (message) => {
 			} else {
 				await message.reply("The bot is currently in another channel right now.");
 			}
-		}b
+		}
 	}
 	else if (messageIncoming === prefix + "current" || messageIncoming === prefix + "nowplaying"  || messageIncoming === prefix + "now") { // Current song command
 		let getSong = async () => {
-			let response = await axios.get("https://player.powerhitz.com/streamdata.php?h=ais-edge16-jbmedia-nyc04.cdnstream.com&p=7080&i=1power");
-			let song = response.data;
-			return song;
+			let response = await axios.get("https://player.powerhitz.com/external.php?http://ais-edge16-jbmedia-nyc04.cdnstream.com:8443/ice_history.php?h=ais-edge16-jbmedia-nyc04.cdnstream.com&p=7080&i=1power");
+			let songList = response.data;
+			return songList[0];
 		}
 		let songValue = await getSong();
 		let exampleEmbed = new MessageEmbed()
 			.setColor("#ffd633")
 			.setAuthor( {name: "▶️ Currently Playing:"} )
-			.setTitle(!songValue.song.includes("POWERHITZ.COM - 1POWER") ? `${songValue.song}` : "Advertisements");
+			.setTitle(!songValue.title.includes("POWERHITZ.COM") ? `${songValue.song}` : "Advertisements");
 
 		message.reply({ embeds: [exampleEmbed] });
 	}
