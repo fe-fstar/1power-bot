@@ -90,7 +90,7 @@ client.on("messageCreate", async (message) => {
 			} else {
 				await message.reply("The bot is currently in another channel right now.");
 			}
-		}
+		}b
 	}
 	else if (messageIncoming === prefix + "current" || messageIncoming === prefix + "nowplaying"  || messageIncoming === prefix + "now") { // Current song command
 		let getSong = async () => {
@@ -140,7 +140,7 @@ client.on("messageCreate", async (message) => {
 				{ name: `\`${prefix}source\``, value: 'Tells you the link to Power Hitz | Hits & Hip Hop' },
 				{ name: `\`${prefix}join\` (or \`${prefix}play\`)`, value: 'Starts playing the radio in the voice channel you are at.' },
 				{ name: `\`${prefix}leave\` (or \`${prefix}stop\`)`, value: 'Stops the radio and disconnects from the channel.' },
-				{ name: `\`${prefix}current\` (or \`${prefix}nowplaying\` or \`${prefix}nowplaying\`)`, value: 'Tells you which music is currently playing (mismatches may occur).' },
+				{ name: `\`${prefix}current\` (or \`${prefix}nowplaying\` or \`${prefix}now\`)`, value: 'Tells you which music is currently playing (mismatches may occur).' },
 				{ name: `\`${prefix}lastplayed\` (or \`${prefix}last\`)`, value: 'Tells you the last 5 tracks played in the radio.' },
 				{ name: `\`${prefix}help\``, value: 'Tells you the available commands.' }
 			);
